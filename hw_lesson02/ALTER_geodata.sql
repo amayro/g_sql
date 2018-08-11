@@ -83,7 +83,15 @@ CHANGE COLUMN `region_id` `id` INT(11) NOT NULL AUTO_INCREMENT,
 CHANGE COLUMN `title_ru` `title` VARCHAR(150) NOT NULL,
 ADD PRIMARY KEY (`id`);
 
-DELETE FROM `geodata`.`_cities` WHERE region_id is NULL;
+
+
+INSERT INTO `geodata`.`_countries` (`title`) VALUE ('не определено');
+
+INSERT INTO `geodata`.`_regions` (`country_id`, `title`) VALUE ('236', 'не определено');
+
+UPDATE `geodata`.`_cities` SET region_id = 5468685 WHERE region_id is NULL;
+
+
 
 ALTER TABLE `geodata`.`_cities`
 CHANGE COLUMN `city_id` `id` INT(11) NOT NULL AUTO_INCREMENT,
