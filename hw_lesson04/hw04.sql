@@ -50,7 +50,6 @@ CREATE VIEW view_DeptEmp_CountSalary as
 -- Создать функцию для поиска менеджера по имени и фамилии --  
 ---------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------
-SHOW PROCEDURE STATUS WHERE Db = DATABASE();
 SHOW FUNCTION STATUS WHERE Db = DATABASE();
 ----------------------------------------------------------------------------------------
 
@@ -61,7 +60,7 @@ CREATE FUNCTION get_manager (fullname VARCHAR(50))
 returns VARCHAR(800)
 begin
 	return(
-		SELECT concat (employees.first_name,' ',employees.last_name, ' | Emp_no: ', employees.emp_no, ' |  Departament: ', dept_name, ' | Salary: ', salary )
+		SELECT concat (employees.first_name,' ',employees.last_name, ' | Emp_no: ', employees.emp_no, ' | Departament: ', dept_name, ' | Salary: ', salary )
 		FROM dept_manager
 		JOIN employees on dept_manager.emp_no = employees.emp_no
 		JOIN departments on dept_manager.dept_no = departments.dept_no
@@ -79,29 +78,27 @@ SELECT get_manager('Vishwani Minakawa');
 -- Создать триггер выплаты бонуса новому сотруднику --  
 ---------------------------------------------------------------------------
 
+DROP TRIGGER if EXISTS trig_salary_bonus;
 
+delimiter //
+
+CREATE TRIGGER trig_salary_bonus
+AFTER INSERT on employees
+for each row
+begin
+	set @emp_no = (select emp_no from employees where emp_no = NEW.emp_no);
+	set @from_date = (select hire_date from employees where emp_no = NEW.emp_no);
+	set @to_date = (select hire_date from employees where emp_no = NEW.emp_no);
+	
+	INSERT INTO salaries VALUES 
+	(@emp_no, 5000, @from_date, @to_date);
+end //
+
+delimiter ;
 
 INSERT INTO `employees` VALUES 
-(10001,'1953-09-02','Georgi','Facello','M','1986-06-26'),
-(10002,'1964-06-02','Bezalel','Simmel','F','1985-11-21'),
-(10003,'1959-12-03','Parto','Bamford','M','1986-08-28');
-(10004,'1954-05-01','Chirstian','Koblick','M','1986-12-01'),
-(10005,'1955-01-21','Kyoichi','Maliniak','M','1989-09-12'),
-(10006,'1953-04-20','Anneke','Preusig','F','1989-06-02'),
-(10007,'1957-05-23','Tzvetan','Zielinski','F','1989-02-10');
-
-insert into employee (first_name,last_name,role,salary,department_id)
-values ('Johny','Doe','worker',15600.00,1);
-
-
-
-
-SELECT concat (employees.first_name,' ',employees.last_name) as full_name, dept_name, hire_date, salary
-FROM dept_manager
-JOIN employees on dept_manager.emp_no = employees.emp_no
-JOIN departments on dept_manager.dept_no = departments.dept_no
-JOIN salaries on employees.emp_no = salaries.emp_no
-WHERE salaries.to_date > now() and dept_manager.to_date > now();
+(500000,'2000-01-01','Georgi','Simmel','M','2019-01-01'),
+(500001,'2000-01-01','Georgi','Simmel','M','2019-01-01');
 
 
 
