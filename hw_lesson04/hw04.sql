@@ -86,12 +86,8 @@ CREATE TRIGGER trig_salary_bonus
 AFTER INSERT on employees
 for each row
 begin
-	set @emp_no = (select emp_no from employees where emp_no = NEW.emp_no);
-	set @from_date = (select hire_date from employees where emp_no = NEW.emp_no);
-	set @to_date = (select hire_date from employees where emp_no = NEW.emp_no);
-	
 	INSERT INTO salaries VALUES 
-	(@emp_no, 5000, @from_date, @to_date);
+	(NEW.emp_no, 5000, NEW.hire_date, NEW.hire_date);
 end //
 
 delimiter ;
@@ -99,15 +95,3 @@ delimiter ;
 INSERT INTO `employees` VALUES 
 (500000,'2000-01-01','Georgi','Simmel','M','2019-01-01'),
 (500001,'2000-01-01','Georgi','Simmel','M','2019-01-01');
-
-
-
-
-
-
-	
-	
-
-
-
-
