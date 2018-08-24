@@ -1,0 +1,89 @@
+=======================================================================================================
+
+mysql> use employees;
+Database changed
+mysql> FLUSH TABLES WITH READ LOCK;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> SHOW MASTER STATUS;
++------------------+----------+--------------+------------------+-------------------+
+| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
++------------------+----------+--------------+------------------+-------------------+
+| mysql-bin.000001 |      155 | employees    |                  |                   |
++------------------+----------+--------------+------------------+-------------------+
+1 row in set (0.00 sec)
+
+
+=======================================================================================================
+
+
+> db.users.insert({'first_name': 'Jack', 'age': '30', 'role':'worker'})
+WriteResult({ "nInserted" : 1 })
+> db.users.find()
+{ "_id" : ObjectId("5b80577d0493c7c216a0a9e3"), "first_name" : "Jack", "age" : "30", "role" : "worker" }
+
+> db.users.insert({'_id': 2,'first_name': 'Tom', 'age': '20', 'role':'worker'})
+WriteResult({ "nInserted" : 1 })
+> db.users.insert({'_id': 3,'first_name': 'White', 'age': '20', 'role':'worker'})
+WriteResult({ "nInserted" : 1 })
+> db.users.find()
+{ "_id" : ObjectId("5b80577d0493c7c216a0a9e3"), "first_name" : "Jack", "age" : "30", "role" : "worker" }
+{ "_id" : 2, "first_name" : "Tom", "age" : "20", "role" : "worker" }
+{ "_id" : 3, "first_name" : "White", "age" : "20", "role" : "worker" }
+
+> db.getCollectionNames()
+[ "users" ]
+
+> db.users.find({'age': '20'})
+{ "_id" : 2, "first_name" : "Tom", "age" : "20", "role" : "worker" }
+{ "_id" : 3, "first_name" : "White", "age" : "20", "role" : "worker" }
+
+
+> db.users.update({'first_name':'Jack'},{$set:{'age': 35}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.users.save({'_id': 2}, {$set: {'age': 20, 'role':'manager'}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.users.find()
+{ "_id" : ObjectId("5b80577d0493c7c216a0a9e3"), "first_name" : "Jack", "age" : 35, "role" : "worker" }
+{ "_id" : 2 }
+{ "_id" : 3, "first_name" : "White", "age" : 20, "role" : "worker" }
+
+> db.users.save({'_id': 2,'first_name': 'Tom', 'age': '20', 'role':'worker'})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.users.update({'first_name':'Jack'},{$set:{'age': 35}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 0 })
+> db.users.update({'_id': 3},{$set:{'age': 25, 'role':'manager'}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 0 })
+> db.users.update({'_id':2},{$set:{'age': 21}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+> db.users.find()
+{ "_id" : ObjectId("5b80577d0493c7c216a0a9e3"), "first_name" : "Jack", "age" : 35, "role" : "worker" }
+{ "_id" : 2, "first_name" : "Tom", "age" : 21, "role" : "worker" }
+{ "_id" : 3, "first_name" : "White", "age" : 25, "role" : "manager" }
+
+> db.users.update({'_id':2},{$set:{'status': 'online'}})
+> db.users.find({'status': {$exists:true}})
+{ "_id" : 2, "first_name" : "Tom", "age" : 21, "role" : "worker", "status" : "online" }
+
+> db.users.updateMany({role: 'worker'}, {$set: {role: 'geek'}})
+{ "acknowledged" : true, "matchedCount" : 2, "modifiedCount" : 2 }
+
+> db.users.find()
+{ "_id" : ObjectId("5b80577d0493c7c216a0a9e3"), "first_name" : "Jack", "age" : 35, "role" : "geek" }
+{ "_id" : 2, "first_name" : "Tom", "age" : 21, "role" : "geek", "status" : "online" }
+{ "_id" : 3, "first_name" : "White", "age" : 25, "role" : "manager" }
+
+> db.users.update({'_id':2},{$unset:{'status': 'online'}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.users.update({'_id':3},{$unset:{'role':'manager','age':25}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+
+> db.users.remove({'age':{$gt:32}})
+WriteResult({ "nRemoved" : 1 })
+> db.users.find()
+{ "_id" : 2, "first_name" : "Tom", "age" : 21, "role" : "geek" }
+{ "_id" : 3, "first_name" : "White" }
+
+
